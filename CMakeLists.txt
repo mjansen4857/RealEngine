@@ -11,7 +11,7 @@ add_executable(RealEngine
         src/RealException.cpp
         src/RealException.h
         src/RealWin.h
-        src/main.cpp
+        src/Main.cpp
         src/resource.h
         src/Window.cpp
-        src/Window.h)
+        src/Window.h src/Keyboard.h src/Keyboard.cpp)

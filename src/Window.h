@@ -1,6 +1,7 @@
 #pragma once
 #include "RealWin.h"
 #include "RealException.h"
+#include "Keyboard.h"
 
 class Window {
 public:
@@ -34,6 +35,8 @@ public:
     ~Window();
     Window(const Window&) = delete;
     Window& operator = (const Window&) = delete;
+
+    Keyboard keyboard;
 private:
     static LRESULT CALLBACK handleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
     static LRESULT CALLBACK handleMsgThunk(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;

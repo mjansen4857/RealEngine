@@ -90,6 +90,24 @@ LRESULT Window::handleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) 
         case WM_CLOSE:
             PostQuitMessage(0);
             return 0;
+        case WM_KILLFOCUS:
+            // Clear key states on focus loss to prevent input getting stuck
+            keyboard.clearState();
+            break;
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            // Weird stuff for windows auto repeating keypresses when held
+            if(!(lParam & 0x40000000) || keyboard.isAutorepeatEnabled()) {
+                keyboard.onKeyPressed(static_cast<unsigned char>(wParam));
+            }
+            break;
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            keyboard.onKeyReleased(static_cast<unsigned char>(wParam));
+            break;
+        case WM_CHAR:
+            keyboard.onChar(static_cast<unsigned char>(wParam));
+            break;
     }
     return DefWindowProc(hWindow, msg, wParam, lParam);
 }
