@@ -6,10 +6,10 @@ class RealException : public std::exception {
 public:
     RealException(int line, const char* file) noexcept;
     const char* what() const noexcept override;
-    virtual const char* GetType() const noexcept;
-    int GetLine() const noexcept;
-    const std::string& GetFile() const noexcept;
-    std::string GetOriginString() const noexcept;
+    virtual const char* getType() const noexcept;
+    int getLine() const noexcept;
+    const std::string& getFile() const noexcept;
+    std::string getOriginString() const noexcept;
 private:
     int line;
     std::string file;

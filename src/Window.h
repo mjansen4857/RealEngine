@@ -8,18 +8,18 @@ public:
     public:
         Exception(int line, const char* file, HRESULT hr) noexcept;
         const char* what() const noexcept override;
-        const char* GetType() const noexcept override;
-        static std::string TranslateErrorCode(HRESULT hr) noexcept;
-        HRESULT GetErrorCode() const noexcept;
-        std::string GetErrorString() const noexcept;
+        const char* getType() const noexcept override;
+        static std::string translateErrorCode(HRESULT hr) noexcept;
+        HRESULT getErrorCode() const noexcept;
+        std::string getErrorString() const noexcept;
     private:
         HRESULT hr;
     };
 private:
     class WindowClass {
     public:
-        static const char* GetName() noexcept;
-        static HINSTANCE GetInstance() noexcept;
+        static const char* getName() noexcept;
+        static HINSTANCE getInstance() noexcept;
     private:
         WindowClass() noexcept;
         ~WindowClass();
@@ -35,9 +35,9 @@ public:
     Window(const Window&) = delete;
     Window& operator = (const Window&) = delete;
 private:
-    static LRESULT CALLBACK HandleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-    static LRESULT CALLBACK HandleMsgThunk(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-    LRESULT HandleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+    static LRESULT CALLBACK handleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+    static LRESULT CALLBACK handleMsgThunk(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+    LRESULT handleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 
     int width;
     int height;
