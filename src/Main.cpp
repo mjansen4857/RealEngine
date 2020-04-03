@@ -1,4 +1,5 @@
 #include "Window.h"
+#include <sstream>
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     try {
@@ -12,6 +13,19 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             if(window.keyboard.isKeyPressed(VK_MENU)){
                 MessageBox(nullptr, "Alt key pressed", "Keyboard Thing", MB_OK | MB_ICONEXCLAMATION);
+            }
+
+            if(window.mouse.isRightPressed()){
+                MessageBox(nullptr, "Right mouse button pressed", "Mouse Thing", MB_OK | MB_ICONEXCLAMATION);
+            }
+
+            while(!window.mouse.isBufferEmpty()){
+                const auto e = window.mouse.read();
+                if(e.getType() == Mouse::Event::Type::Move){
+                    std::ostringstream oss;
+                    oss << "RealEngine Window | Mouse Pos: (" << e.getXPos() << ", " << e.getYPos() << ")";
+                    window.setTitle(oss.str());
+                }
             }
         }
 

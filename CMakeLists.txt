@@ -14,4 +14,4 @@ add_executable(RealEngine
         src/Main.cpp
         src/resource.h
         src/Window.cpp
-        src/Window.h src/Keyboard.h src/Keyboard.cpp)
+        src/Window.h src/Keyboard.h src/Keyboard.cpp src/Mouse.h src/Mouse.cpp)

@@ -4,8 +4,7 @@
 
 Window::WindowClass Window::WindowClass::windowClass;
 
-Window::WindowClass::WindowClass() noexcept :
-        hInstance(GetModuleHandle(nullptr)) {
+Window::WindowClass::WindowClass() noexcept : hInstance(GetModuleHandle(nullptr)) {
     WNDCLASSEX wc = {0};
     wc.cbSize = sizeof(wc);
     wc.style = CS_OWNDC;
@@ -14,7 +13,6 @@ Window::WindowClass::WindowClass() noexcept :
     wc.cbWndExtra = 0;
     wc.hInstance = getInstance();
     wc.hIcon = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, 0));
-//    wc.hIcon = static_cast<HICON>(LoadIcon(hInstance, ));
     wc.hCursor = nullptr;
     wc.hbrBackground = nullptr;
     wc.lpszMenuName = nullptr;
@@ -41,8 +39,8 @@ Window::Window(int width, int height, const char* name) : width(width), height(h
     wr.right = width + wr.left;
     wr.top = 100;
     wr.bottom = height + wr.top;
-    if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE))) {
-        throw DXWINDOW_LAST_EXCEPTION();
+    if (AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0) {
+        throw RE_WINDOW_LAST_EXCEPTION();
     }
 
     hWindow = CreateWindow(
@@ -59,7 +57,7 @@ Window::Window(int width, int height, const char* name) : width(width), height(h
             this
     );
     if (hWindow == nullptr) {
-        throw DXWINDOW_LAST_EXCEPTION();
+        throw RE_WINDOW_LAST_EXCEPTION();
     }
 
     ShowWindow(hWindow, SW_SHOWDEFAULT);
@@ -67,6 +65,12 @@ Window::Window(int width, int height, const char* name) : width(width), height(h
 
 Window::~Window() {
     DestroyWindow(hWindow);
+}
+
+void Window::setTitle(const std::string title) {
+    if(SetWindowText(hWindow, title.c_str()) == 0){
+        throw RE_WINDOW_LAST_EXCEPTION();
+    }
 }
 
 LRESULT CALLBACK Window::handleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -108,6 +112,56 @@ LRESULT Window::handleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) 
         case WM_CHAR:
             keyboard.onChar(static_cast<unsigned char>(wParam));
             break;
+        case WM_MOUSEMOVE:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            if(point.x >=0 && point.x < width && point.y >= 0 && point.y < height){
+                mouse.onMouseMove(point.x, point.y);
+                if(!mouse.isInWindow()){
+                    SetCapture(hWindow);
+                    mouse.onMouseEnter();
+                }
+            }else{
+                if(wParam & (MK_LBUTTON | MK_RBUTTON)){
+                    mouse.onMouseMove(point.x, point.y);
+                }else{
+                    ReleaseCapture();
+                    mouse.onMouseLeave();
+                }
+            }
+            break;
+        }
+        case WM_LBUTTONDOWN:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            mouse.onLeftPressed(point.x, point.y);
+            break;
+        }
+        case WM_RBUTTONDOWN:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            mouse.onRightPressed(point.x, point.y);
+            break;
+        }
+        case WM_LBUTTONUP:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            mouse.onLeftReleased(point.x, point.y);
+            break;
+        }
+        case WM_RBUTTONUP:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            mouse.onRightReleased(point.x, point.y);
+            break;
+        }
+        case WM_MOUSEWHEEL:
+        {
+            const POINTS point = MAKEPOINTS(lParam);
+            const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+            mouse.onWheelDelta(point.x, point.y, delta);
+            break;
+        }
     }
     return DefWindowProc(hWindow, msg, wParam, lParam);
 }

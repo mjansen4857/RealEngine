@@ -2,6 +2,7 @@
 #include "RealWin.h"
 #include "RealException.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 
 class Window {
 public:
@@ -35,8 +36,10 @@ public:
     ~Window();
     Window(const Window&) = delete;
     Window& operator = (const Window&) = delete;
+    void setTitle(const std::string title);
 
     Keyboard keyboard;
+    Mouse mouse;
 private:
     static LRESULT CALLBACK handleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
     static LRESULT CALLBACK handleMsgThunk(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -47,5 +50,5 @@ private:
     HWND hWindow;
 };
 
-#define DXWINDOW_EXCEPTION(hr) Window::Exception(__LINE__, __FILE__, hr)
-#define DXWINDOW_LAST_EXCEPTION() Window::Exception(__LINE__, __FILE__, GetLastError())
+#define RE_WINDOW_EXCEPTION(hr) Window::Exception(__LINE__, __FILE__, hr)
+#define RE_WINDOW_LAST_EXCEPTION() Window::Exception(__LINE__, __FILE__, GetLastError())
