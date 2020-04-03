@@ -73,6 +73,20 @@ void Window::setTitle(const std::string title) {
     }
 }
 
+std::optional<int> Window::processMessages() {
+    MSG msg;
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        if (msg.message == WM_QUIT) {
+            return (int) msg.wParam;
+        }
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return {};
+}
+
 LRESULT CALLBACK Window::handleMsgSetup(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
     if (msg == WM_NCCREATE) {
         const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);

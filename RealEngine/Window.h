@@ -3,6 +3,7 @@
 #include "RealException.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include <optional>
 
 class Window {
 public:
@@ -37,6 +38,7 @@ public:
     Window(const Window&) = delete;
     Window& operator = (const Window&) = delete;
     void setTitle(const std::string title);
+    static std::optional<int> processMessages();
 
     Keyboard keyboard;
     Mouse mouse;
