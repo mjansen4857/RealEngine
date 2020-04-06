@@ -3,7 +3,9 @@
 #include "RealException.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Graphics.h"
 #include <optional>
+#include <memory>
 
 class Window {
 public:
@@ -39,6 +41,7 @@ public:
     Window& operator = (const Window&) = delete;
     void setTitle(const std::string title);
     static std::optional<int> processMessages();
+    Graphics& graphics();
 
     Keyboard keyboard;
     Mouse mouse;
@@ -50,6 +53,7 @@ private:
     int width;
     int height;
     HWND hWindow;
+    std::unique_ptr<Graphics> gfx;
 };
 
 #define RE_WINDOW_EXCEPTION(hr) Window::Exception(__LINE__, __FILE__, hr)
