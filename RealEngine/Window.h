@@ -10,15 +10,24 @@
 class Window {
 public:
     class Exception : public RealException {
+        using RealException::RealException;
     public:
-        Exception(int line, const char* file, HRESULT hr) noexcept;
+        static std::string translateErrorCode(HRESULT hr) noexcept;
+    };
+    class HRException : public Exception {
+    public:
+        HRException(int line, const char* file, HRESULT hr) noexcept;
         const char* what() const noexcept override;
         const char* getType() const noexcept override;
-        static std::string translateErrorCode(HRESULT hr) noexcept;
         HRESULT getErrorCode() const noexcept;
-        std::string getErrorString() const noexcept;
+        std::string getErrorDescription() const noexcept;
     private:
         HRESULT hr;
+    };
+    class NoGFXException : public Exception {
+    public:
+        using Exception::Exception;
+        const char* getType() const noexcept override;
     };
 private:
     class WindowClass {
@@ -40,7 +49,7 @@ public:
     Window(const Window&) = delete;
     Window& operator = (const Window&) = delete;
     void setTitle(const std::string title);
-    static std::optional<int> processMessages();
+    static std::optional<int> processMessages() noexcept;
     Graphics& graphics();
 
     Keyboard keyboard;
@@ -56,5 +65,6 @@ private:
     std::unique_ptr<Graphics> gfx;
 };
 
-#define RE_WINDOW_EXCEPTION(hr) Window::Exception(__LINE__, __FILE__, hr)
-#define RE_WINDOW_LAST_EXCEPTION() Window::Exception(__LINE__, __FILE__, GetLastError())
+#define RE_WINDOW_EXCEPTION(hr) Window::HRException(__LINE__, __FILE__, hr)
+#define RE_WINDOW_LAST_EXCEPTION() Window::HRException(__LINE__, __FILE__, GetLastError())
+#define RE_WINDOW_NOGFX_EXCEPTION() Window::NoGFXException(__LINE__, __FILE__)

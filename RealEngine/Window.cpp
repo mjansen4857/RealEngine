@@ -74,7 +74,7 @@ void Window::setTitle(const std::string title) {
     }
 }
 
-std::optional<int> Window::processMessages() {
+std::optional<int> Window::processMessages() noexcept {
     MSG msg;
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT) {
@@ -89,6 +89,9 @@ std::optional<int> Window::processMessages() {
 }
 
 Graphics& Window::graphics() {
+    if (!gfx) {
+        throw RE_WINDOW_NOGFX_EXCEPTION();
+    }
     return *gfx;
 }
 
@@ -185,29 +188,9 @@ LRESULT Window::handleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) 
     return DefWindowProc(hWindow, msg, wParam, lParam);
 }
 
-Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept :
-        RealException(line, file),
-        hr(hr) {
-
-}
-
-const char* Window::Exception::what() const noexcept {
-    std::ostringstream oss;
-    oss << getType() << std::endl
-        << "[Error Code] " << getErrorCode() << std::endl
-        << "[Description] " << getErrorString() << std::endl
-        << getOriginString();
-    whatBuffer = oss.str();
-    return whatBuffer.c_str();
-}
-
-const char* Window::Exception::getType() const noexcept {
-    return "RealEngine Window Exception";
-}
-
 std::string Window::Exception::translateErrorCode(HRESULT hr) noexcept {
     char* msgBuf = nullptr;
-    DWORD msgLen = FormatMessage(
+    const DWORD msgLen = FormatMessage(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             nullptr,
             hr,
@@ -226,10 +209,34 @@ std::string Window::Exception::translateErrorCode(HRESULT hr) noexcept {
     return errorString;
 }
 
-HRESULT Window::Exception::getErrorCode() const noexcept {
+Window::HRException::HRException(int line, const char* file, HRESULT hr) noexcept :
+    Exception(line, file),
+    hr(hr) {
+}
+
+const char* Window::HRException::what() const noexcept {
+    std::ostringstream oss;
+    oss << getType() << std::endl
+        << "[Error Code] 0x" << std::hex << std::uppercase << getErrorCode()
+        << std::dec << " (" << (unsigned long) getErrorCode() << ")" << std::endl
+        << "[Description] " << getErrorDescription() << std::endl
+        << getOriginString();
+    whatBuffer = oss.str();
+    return whatBuffer.c_str();
+}
+
+const char* Window::HRException::getType() const noexcept {
+    return "RealEngine Window Exception";
+}
+
+HRESULT Window::HRException::getErrorCode() const noexcept {
     return hr;
 }
 
-std::string Window::Exception::getErrorString() const noexcept {
-    return translateErrorCode(hr);
+std::string Window::HRException::getErrorDescription() const noexcept {
+    return Exception::translateErrorCode(hr);
+}
+
+const char* Window::NoGFXException::getType() const noexcept {
+    return "RealEngine Window Exception [No Graphics]";
 }
