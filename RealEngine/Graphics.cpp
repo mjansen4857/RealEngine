@@ -2,6 +2,8 @@
 #include "DXError.h"
 #include <sstream>
 
+namespace wrl = Microsoft::WRL;
+
 #pragma comment(lib, "d3d11.lib")
 
 #define GFX_EXCEPTION_NOINFO(hr) Graphics::HRException(__LINE__, __FILE__, (hr))
@@ -56,28 +58,9 @@ Graphics::Graphics(HWND hWindow) {
 		&context
 	));
 
-	ID3D11Resource* backBuffer = nullptr;
-	GFX_THROW_INFO(swap->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer)));
-	GFX_THROW_INFO(device->CreateRenderTargetView(backBuffer, nullptr, &target));
-	backBuffer->Release();
-}
-
-Graphics::~Graphics() {
-	if (target != nullptr) {
-		target->Release();
-	}
-
-	if (context != nullptr) {
-		context->Release();
-	}
-
-	if (swap != nullptr) {
-		swap->Release();
-	}
-
-	if (device != nullptr) {
-		device->Release();
-	}
+	wrl::ComPtr<ID3D11Resource> backBuffer;
+	GFX_THROW_INFO(swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer));
+	GFX_THROW_INFO(device->CreateRenderTargetView(backBuffer.Get(), nullptr, &target));
 }
 
 void Graphics::presentFrame() {
@@ -96,7 +79,7 @@ void Graphics::presentFrame() {
 
 void Graphics::clearBuffer(float red, float green, float blue) noexcept {
 	const float color[] = {red, green, blue, 1.0f};
-	context->ClearRenderTargetView(target, color);
+	context->ClearRenderTargetView(target.Get(), color);
 }
 
 Graphics::HRException::HRException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept : Exception(line, file), hr(hr) {

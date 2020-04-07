@@ -26,13 +26,7 @@ DxgiInfoManager::DxgiInfoManager() {
 	}
 
 	HRESULT hr;
-	GFX_THROW_NOINFO(dxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&dxgiInfoQueue)));
-}
-
-DxgiInfoManager::~DxgiInfoManager() {
-	if (dxgiInfoQueue != nullptr) {
-		dxgiInfoQueue->Release();
-	}
+	GFX_THROW_NOINFO(dxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), &dxgiInfoQueue));
 }
 
 void DxgiInfoManager::set() noexcept {
