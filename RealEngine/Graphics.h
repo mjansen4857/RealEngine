@@ -24,6 +24,15 @@ public:
 		HRESULT hr;
 		std::string info;
 	};
+	class InfoException : public Exception {
+	public:
+		InfoException(int line, const char* file, std::vector<std::string> infoMsgs) noexcept;
+		const char* what() const noexcept override;
+		const char* getType() const noexcept override;
+		std::string getErrorInfo() const noexcept;
+	private:
+		std::string info;
+	};
 	class DeviceRemovedException : public HRException {
 		using HRException::HRException;
 	public:
@@ -38,6 +47,7 @@ public:
 	~Graphics() = default;
 	void presentFrame();
 	void clearBuffer(float red, float green, float blue) noexcept;
+	void drawTestTriangle();
 private:
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;

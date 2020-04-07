@@ -16,6 +16,9 @@
     <Filter Include="DXError">
       <UniqueIdentifier>{e57aac82-2bd0-4ef6-b9b4-0075a9023f78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{80d2d044-56cc-43f8-8b9e-2e54183380b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Keyboard.h">
@@ -107,5 +110,13 @@
     <None Include="DXGetErrorString.inl">
       <Filter>DXError</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
