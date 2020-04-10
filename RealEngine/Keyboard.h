@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <bitset>
+#include <optional>
 
 class Keyboard {
     friend class Window;
@@ -10,17 +11,12 @@ public:
     public:
         enum class Type {
             Press,
-            Release,
-            Invalid
+            Release
         };
     private:
         Type type;
         unsigned char code;
     public:
-        Event() : type(Type::Invalid), code(0u) {
-
-        }
-
         Event(Type type, unsigned char code) noexcept : type(type), code(code) {
 
         }
@@ -31,10 +27,6 @@ public:
 
         bool isRelease() const noexcept {
             return type == Type::Release;
-        }
-
-        bool isValid() const noexcept {
-            return type != Type::Invalid;
         }
 
         unsigned char getCode() const noexcept {
@@ -48,10 +40,10 @@ public:
     Keyboard& operator = (const Keyboard&) = delete;
 
     bool isKeyPressed(unsigned char keycode) const noexcept;
-    Event readKey() noexcept;
+    std::optional<Event> readKey() noexcept;
     bool isKeyBufferEmpty() const noexcept;
     void flushKeyBuffer() noexcept;
-    char readChar() noexcept;
+    std::optional<char> readChar() noexcept;
     bool isCharBufferEmpty() const noexcept;
     void flushCharBuffer() noexcept;
     void flush() noexcept;

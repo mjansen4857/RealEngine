@@ -87,18 +87,29 @@ void Graphics::clearBuffer(float red, float green, float blue) noexcept {
 }
 
 void Graphics::drawTestTriangle() {
-	namespace wrl = Microsoft::WRL;
 	HRESULT hr;
 
 	struct Vertex {
-		float x;
-		float y;
+		struct {
+			float x;
+			float y;
+		} pos;
+		struct {
+			unsigned char r;
+			unsigned char g;
+			unsigned char b;
+			unsigned char a;
+		} color;
 	};
 
-	const Vertex verticies[] = {
-		{0.0f, 0.5f},
-		{0.5f, -0.5f},
-		{-0.5f, -0.5f}
+	Vertex verticies[] = {
+		{0.0f, 0.5f, 91, 60, 105, 0},
+		{0.5f, -0.5f, 3, 38, 61, 0},
+		{-0.5f, -0.5f, 3, 38, 61, 0},
+
+		{-0.3f, 0.3f, 22, 22, 22, 0},
+		{0.3f, 0.3f, 22, 22, 22, 0},
+		{0.0f, -0.8f, 22, 22, 22, 0}
 	};
 
 	wrl::ComPtr<ID3D11Buffer> vertexBuffer;
@@ -117,6 +128,26 @@ void Graphics::drawTestTriangle() {
 	const UINT offset = 0u;
 	context->IASetVertexBuffers(0u, 1u, vertexBuffer.GetAddressOf(), &stride, &offset);
 
+	const unsigned short indices[] = {
+		0, 1, 2,
+		0, 2, 3,
+		0, 4, 1,
+		2, 1, 5
+	};
+	wrl::ComPtr<ID3D11Buffer> indexBuffer;
+	D3D11_BUFFER_DESC ibd = {};
+	ibd.BindFlags = D3D11_USAGE_DEFAULT;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.CPUAccessFlags = 0u;
+	ibd.MiscFlags = 0u;
+	ibd.ByteWidth = sizeof(indices);
+	ibd.StructureByteStride = sizeof(unsigned short);
+	D3D11_SUBRESOURCE_DATA isd = {};
+	isd.pSysMem = indices;
+	GFX_THROW_INFO(device->CreateBuffer(&ibd, &isd, &indexBuffer));
+
+	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+
 	wrl::ComPtr<ID3D11PixelShader> pixelShader;
 	wrl::ComPtr<ID3DBlob> blob;
 	GFX_THROW_INFO(D3DReadFileToBlob(L"PixelShader.cso", &blob));
@@ -133,6 +164,7 @@ void Graphics::drawTestTriangle() {
 	wrl::ComPtr<ID3D11InputLayout> inputLayout;
 	const D3D11_INPUT_ELEMENT_DESC ied[] = {
 		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 8u, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	GFX_THROW_INFO(device->CreateInputLayout(
 		ied,
@@ -157,7 +189,7 @@ void Graphics::drawTestTriangle() {
 	vp.TopLeftY = 0;
 	context->RSSetViewports(1u, &vp);
 
-	GFX_THROW_INFO_ONLY(context->Draw((UINT) std::size(verticies), 0u));
+	GFX_THROW_INFO_ONLY(context->DrawIndexed((UINT) std::size(indices), 0u, 0u));
 }
 
 Graphics::HRException::HRException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept : Exception(line, file), hr(hr) {

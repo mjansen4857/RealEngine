@@ -1,8 +1,8 @@
 #include "App.h"
 
-int r = 255;
-int g = 0;
-int b = 0;
+int r = 42;
+int g = 42;
+int b = 42;
 
 App::App() : window(1280, 720, "RealEngine") {
 
@@ -19,7 +19,7 @@ int App::start() {
 }
 
 void App::update() {
-    if (r > 0 && b == 0) {
+    /*if (r > 0 && b == 0) {
         r--;
         g++;
     }
@@ -32,7 +32,7 @@ void App::update() {
     if (b > 0 && g == 0) {
         r++;
         b--;
-    }
+    }*/
 
     //const float r = sin(timer.get()) / 2.0f + 0.5f;
     //const float g = sin(timer.get() / 2) / 2.0f + 0.5f;
