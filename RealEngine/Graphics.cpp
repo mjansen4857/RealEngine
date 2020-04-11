@@ -2,6 +2,7 @@
 #include "DXError.h"
 #include <sstream>
 #include <d3dcompiler.h>
+#include <cmath>
 
 namespace wrl = Microsoft::WRL;
 
@@ -86,7 +87,7 @@ void Graphics::clearBuffer(float red, float green, float blue) noexcept {
 	context->ClearRenderTargetView(target.Get(), color);
 }
 
-void Graphics::drawTestTriangle() {
+void Graphics::drawTestTriangle(float angle) {
 	HRESULT hr;
 
 	struct Vertex {
@@ -104,12 +105,12 @@ void Graphics::drawTestTriangle() {
 
 	Vertex verticies[] = {
 		{0.0f, 0.5f, 91, 60, 105, 0},
-		{0.5f, -0.5f, 3, 38, 61, 0},
-		{-0.5f, -0.5f, 3, 38, 61, 0},
+		{0.6f, -0.5f, 3, 38, 61, 0},
+		{-0.6f, -0.5f, 3, 38, 61, 0},
 
-		{-0.3f, 0.3f, 22, 22, 22, 0},
-		{0.3f, 0.3f, 22, 22, 22, 0},
-		{0.0f, -0.8f, 22, 22, 22, 0}
+		{-0.6f, 0.2f, 3, 38, 61, 0},
+		{0.6f, 0.2f, 3, 38, 61, 0},
+		{0.0f, -0.9f, 91, 60, 105, 0}
 	};
 
 	wrl::ComPtr<ID3D11Buffer> vertexBuffer;
@@ -147,6 +148,31 @@ void Graphics::drawTestTriangle() {
 	GFX_THROW_INFO(device->CreateBuffer(&ibd, &isd, &indexBuffer));
 
 	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+
+	struct ConstantBuffer {
+		struct {
+			float element[4][4];
+		} transformation;
+	};
+	const ConstantBuffer cb = {
+		{(9.0f/16.0f) *    std::cos(angle), std::sin(angle), 0.0f, 0.0f,
+		 (9.0f / 16.0f) * -std::sin(angle), std::cos(angle), 0.0f, 0.0f,
+		 0.0f,                              0.0f,            1.0f, 0.0f,
+		 0.0f,                              0.0f,            0.0f, 1.0f}
+	};
+	wrl::ComPtr<ID3D11Buffer> constantBuffer;
+	D3D11_BUFFER_DESC cbd;
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbd.MiscFlags = 0u;
+	cbd.ByteWidth = sizeof(cb);
+	cbd.StructureByteStride = 0u;
+	D3D11_SUBRESOURCE_DATA csd = {};
+	csd.pSysMem = &cb;
+	GFX_THROW_INFO(device->CreateBuffer(&cbd, &csd, &constantBuffer));
+
+	context->VSSetConstantBuffers(0u, 1u, constantBuffer.GetAddressOf());
 
 	wrl::ComPtr<ID3D11PixelShader> pixelShader;
 	wrl::ComPtr<ID3DBlob> blob;
