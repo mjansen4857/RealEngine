@@ -157,6 +157,7 @@ LRESULT Window::handleMsg(HWND hWindow, UINT msg, WPARAM wParam, LPARAM lParam) 
         {
             const POINTS point = MAKEPOINTS(lParam);
             mouse.onLeftPressed(point.x, point.y);
+            SetForegroundWindow(hWindow);
             break;
         }
         case WM_RBUTTONDOWN:

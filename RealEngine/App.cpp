@@ -38,6 +38,7 @@ void App::update() {
     //const float g = sin(timer.get() / 2) / 2.0f + 0.5f;
     //const float b = sin(timer.get() / 4) / 2.0f + 0.5f;
     window.graphics().clearBuffer(r / 255.0f, g / 255.0f, b / 255.0f);
+    window.graphics().drawTestTriangle(-timer.get(), 0, 0);
     float mouseX = window.mouse.getXPos() / 640.0f - 1.0f;
     float mouseY = -window.mouse.getYPos() / 480.0f + 1.0f;
     window.graphics().drawTestTriangle(timer.get(), mouseX, mouseY);
