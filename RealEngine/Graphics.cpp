@@ -3,8 +3,10 @@
 #include <sstream>
 #include <d3dcompiler.h>
 #include <cmath>
+#include <DirectXMath.h>
 
 namespace wrl = Microsoft::WRL;
+namespace dx = DirectX;
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
@@ -87,7 +89,7 @@ void Graphics::clearBuffer(float red, float green, float blue) noexcept {
 	context->ClearRenderTargetView(target.Get(), color);
 }
 
-void Graphics::drawTestTriangle(float angle) {
+void Graphics::drawTestTriangle(float angle, float x, float y) {
 	HRESULT hr;
 
 	struct Vertex {
@@ -150,15 +152,14 @@ void Graphics::drawTestTriangle(float angle) {
 	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 
 	struct ConstantBuffer {
-		struct {
-			float element[4][4];
-		} transformation;
+		dx::XMMATRIX transform;
 	};
 	const ConstantBuffer cb = {
-		{(9.0f/16.0f) *    std::cos(angle), std::sin(angle), 0.0f, 0.0f,
-		 (9.0f / 16.0f) * -std::sin(angle), std::cos(angle), 0.0f, 0.0f,
-		 0.0f,                              0.0f,            1.0f, 0.0f,
-		 0.0f,                              0.0f,            0.0f, 1.0f}
+		{dx::XMMatrixTranspose(
+			dx::XMMatrixRotationZ(angle) *
+			dx::XMMatrixScaling(9.0f / 16.0f, 1.0f, 1.0f) *
+			dx::XMMatrixTranslation(x, y, 0.0f)
+		)}
 	};
 	wrl::ComPtr<ID3D11Buffer> constantBuffer;
 	D3D11_BUFFER_DESC cbd;
